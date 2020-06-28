@@ -1,10 +1,9 @@
 import pygame
 import os
-import time
 import random
 
 # Set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (50,50)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (50, 50)
 
 pygame.init()
 font = pygame.font.SysFont("monospace", 20)
@@ -97,6 +96,8 @@ def main():
     ticks = 0
     dead = False
     score = 0
+    keys_pressed = []
+
     # icon = pygame.image.load(os.path.join("assets", "HelloWorld_32x32.png"))
     pygame.display.set_caption(TITLE)
     # pygame.display.set_icon(icon)
@@ -106,6 +107,22 @@ def main():
     food = new_food(WIDTH, HEIGHT - 50)
     clock = pygame.time.Clock()
     snake = Snake(pos_x, pos_y)
+
+    def process_input():
+        d = 0
+        if len(keys_pressed) != 0:
+            key = keys_pressed[0]
+            if key == pygame.K_LEFT and pos_x > 0:
+                d = 0
+            if key == pygame.K_RIGHT and pos_x < WIDTH - 10:
+                d = 1
+            if key == pygame.K_UP and pos_y < HEIGHT - 10:
+                d = 2
+            if key == pygame.K_DOWN and pos_y > 0:
+                d = 3
+            del keys_pressed[0]
+            return d
+        return direction
 
     def update(x, y):
         # SCREEN.blit(text_label, (x, y))
@@ -127,6 +144,7 @@ def main():
         else:
             ticks = 0
             if not dead:
+                direction = process_input()
                 dead = not snake.move(direction, WIDTH, HEIGHT - 50)
                 if snake.contains(food):
                     score += 1
@@ -136,18 +154,19 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYUP:
+                keys_pressed.append(event.key)
                 if event.key == pygame.K_q:
                     running = False
-        keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT] and pos_x > 0:
-            direction = 0
-        if keys[pygame.K_RIGHT] and pos_x < WIDTH - 10:
-            direction = 1
-        if keys[pygame.K_UP] and pos_y < HEIGHT - 10:
-            direction = 2
-        if keys[pygame.K_DOWN] and pos_y > 0:
-            direction = 3
+
+        # if keys[pygame.K_LEFT] and pos_x > 0:
+        #     direction = 0
+        # if keys[pygame.K_RIGHT] and pos_x < WIDTH - 10:
+        #     direction = 1
+        # if keys[pygame.K_UP] and pos_y < HEIGHT - 10:
+        #     direction = 2
+        # if keys[pygame.K_DOWN] and pos_y > 0:
+        #     direction = 3
 
         SCREEN.fill((0, 0, 0))
         pos_x, pos_y = update(pos_x, pos_y)
@@ -155,4 +174,5 @@ def main():
     pygame.quit()
 
 
-main()
+if __name__ == '__main__':
+    main()
