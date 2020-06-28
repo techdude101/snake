@@ -109,20 +109,19 @@ def main():
     snake = Snake(pos_x, pos_y)
 
     def process_input():
-        d = 0
+        d = direction
         if len(keys_pressed) != 0:
             key = keys_pressed[0]
-            if key == pygame.K_LEFT and pos_x > 0:
+            if key == pygame.K_LEFT and pos_x > 0 and direction != 1:
                 d = 0
-            if key == pygame.K_RIGHT and pos_x < WIDTH - 10:
+            if key == pygame.K_RIGHT and pos_x < WIDTH - 10 and direction != 0:
                 d = 1
-            if key == pygame.K_UP and pos_y < HEIGHT - 10:
+            if key == pygame.K_UP and pos_y < HEIGHT - 10 and direction != 3:
                 d = 2
-            if key == pygame.K_DOWN and pos_y > 0:
+            if key == pygame.K_DOWN and pos_y > 0 and direction != 2:
                 d = 3
             del keys_pressed[0]
-            return d
-        return direction
+        return d
 
     def update(x, y):
         # SCREEN.blit(text_label, (x, y))
@@ -142,6 +141,9 @@ def main():
         if ticks < 10:
             ticks += 1
         else:
+            if dead:
+                running = False
+
             ticks = 0
             if not dead:
                 direction = process_input()
@@ -153,26 +155,32 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                quit()
             if event.type == pygame.KEYUP:
                 keys_pressed.append(event.key)
                 if event.key == pygame.K_q:
                     running = False
 
-
-        # if keys[pygame.K_LEFT] and pos_x > 0:
-        #     direction = 0
-        # if keys[pygame.K_RIGHT] and pos_x < WIDTH - 10:
-        #     direction = 1
-        # if keys[pygame.K_UP] and pos_y < HEIGHT - 10:
-        #     direction = 2
-        # if keys[pygame.K_DOWN] and pos_y > 0:
-        #     direction = 3
-
         SCREEN.fill((0, 0, 0))
         pos_x, pos_y = update(pos_x, pos_y)
         pygame.display.update()
+
+
+def main_menu():
+    run = True
+
+    while run:
+        title_label = font.render("Press space to start...", 1, (255, 255, 255))
+        SCREEN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, HEIGHT / 2 - (title_label.get_height() / 2)))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                main()
     pygame.quit()
+    quit()
 
 
 if __name__ == '__main__':
-    main()
+    main_menu()
