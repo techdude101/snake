@@ -13,6 +13,8 @@ WIDTH = 800
 HEIGHT = 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 60
+RECT_SIZE = 20
+KEYS = [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
 
 
 class Snake:
@@ -24,6 +26,20 @@ class Snake:
         self.snake = [(self.x, self.y)]
         for x in range(1, length):
             self.add(self.x - (x * height), self.y)
+
+    def grow(self):
+        x = 0
+        y = 0
+        s1 = self.snake[-1]
+        s2 = self.snake[-2]
+
+        if s1[1] == s2[1]:
+            x = s1[0] + (s1[0] - s2[0])
+            y = s1[1]
+        if s1[0] == s2[0]:
+            x = s1[0]
+            y = s1[1] + (s1[1] - s2[1])
+        self.snake.append((x, y))
 
     def add(self, x, y):
         self.snake.insert(0, (x, y))
@@ -58,18 +74,18 @@ class Snake:
 
     def draw(self, surface):
         for s in self.snake:
-            pygame.draw.rect(surface, (0, 255, 0), (s[0], s[1], 10, 10))
+            pygame.draw.rect(surface, (0, 255, 0), (s[0], s[1], self.height, self.height))
 
 
 def draw_food(surface, x, y):
-    pygame.draw.rect(surface, (255, 255, 255), (x, y, 10, 10))
+    pygame.draw.rect(surface, (255, 255, 255), (x, y, RECT_SIZE, RECT_SIZE))
 
 
 def new_food(width, height):
     while True:
         x = random.randrange(0, width)
         y = random.randrange(0, height)
-        if x % 10 == 0 and y % 10 == 0:
+        if x % RECT_SIZE == 0 and y % RECT_SIZE == 0:
             break
     return x, y
 
@@ -106,7 +122,7 @@ def main():
     running = True
     food = new_food(WIDTH, HEIGHT - 50)
     clock = pygame.time.Clock()
-    snake = Snake(pos_x, pos_y)
+    snake = Snake(WIDTH - RECT_SIZE, pos_y, 10, RECT_SIZE)
 
     def process_input():
         d = direction
@@ -138,7 +154,7 @@ def main():
 
     while running:
         clock.tick(FPS)
-        if ticks < 10:
+        if ticks < 8:
             ticks += 1
         else:
             if dead:
@@ -150,6 +166,7 @@ def main():
                 dead = not snake.move(direction, WIDTH, HEIGHT - 50)
                 if snake.contains(food):
                     score += 1
+                    snake.grow()
                     food = new_food(WIDTH, HEIGHT - 50)
 
         for event in pygame.event.get():
@@ -157,7 +174,8 @@ def main():
                 running = False
                 quit()
             if event.type == pygame.KEYUP:
-                keys_pressed.append(event.key)
+                if event.key in KEYS:
+                    keys_pressed.append(event.key)
                 if event.key == pygame.K_q:
                     running = False
 
@@ -171,7 +189,7 @@ def main_menu():
 
     while run:
         title_label = font.render("Press space to start...", 1, (255, 255, 255))
-        SCREEN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, HEIGHT / 2 - (title_label.get_height() / 2)))
+        SCREEN.blit(title_label, (WIDTH / 2 - title_label.get_width() / 2, HEIGHT / 2 - (title_label.get_height() / 2)))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
